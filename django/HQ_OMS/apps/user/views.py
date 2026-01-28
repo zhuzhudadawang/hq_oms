@@ -1,4 +1,5 @@
 from rest_framework.generics import GenericAPIView
+from rest_framework.permissions import AllowAny
 from apps.user.models import Users
 from apps.user.serializers import UserSerializer
 from utils.Response import ApiResponse
@@ -7,6 +8,9 @@ from utils.password_encode import get_md5
 
 
 class LoginAPIView(GenericAPIView):
+    authentication_classes = []  # 登录接口不需要认证
+    permission_classes = [AllowAny]  # 允许任何人访问
+    
     def post(self, request):
         return_data = {}
         request_data = request.data

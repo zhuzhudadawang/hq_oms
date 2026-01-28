@@ -1,6 +1,5 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
-import router from '@/router'
 
 // 创建 axios 实例
 const request = axios.create({
@@ -11,10 +10,24 @@ const request = axios.create({
   }
 })
 
+// 清除登录状态并跳转
+const clearAuthAndRedirect = () => {
+  // 清除 localStorage
+  localStorage.removeItem('token')
+  localStorage.removeItem('userInfo')
+  localStorage.removeItem('roles')
+  localStorage.removeItem('permissions')
+  localStorage.removeItem('menus')
+  
+  // 延迟1.5秒跳转，让用户看到提示
+  setTimeout(() => {
+    window.location.href = '/login'
+  }, 1500)
+}
+
 // 请求拦截器
 request.interceptors.request.use(
   (config) => {
-    // 从 localStorage 获取 token
     const token = localStorage.getItem('token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
@@ -30,17 +43,13 @@ request.interceptors.request.use(
 // 响应拦截器
 request.interceptors.response.use(
   (response) => {
-    const { code, data, message,error } = response.data
+    const { code, data, message, error } = response.data
     
-    // 根据后端返回的 code 处理
     if (error === 0 || code === 0 || code === 200) {
-      return data ? data : response.data // 增加若data为空时返回response.data
+      return data ? data : response.data
     } else if (code === 401) {
-      // 未授权，跳转到登录页
       ElMessage.error('登录已过期，请重新登录')
-      localStorage.removeItem('token')
-      localStorage.removeItem('userInfo')
-      router.push('/login')
+      clearAuthAndRedirect()
       return Promise.reject(new Error(message || '未授权'))
     } else {
       ElMessage.error(message || '请求失败')
@@ -56,9 +65,7 @@ request.interceptors.response.use(
       switch (status) {
         case 401:
           ElMessage.error('登录已过期，请重新登录')
-          localStorage.removeItem('token')
-          localStorage.removeItem('userInfo')
-          router.push('/login')
+          clearAuthAndRedirect()
           break
         case 403:
           ElMessage.error('没有权限访问')

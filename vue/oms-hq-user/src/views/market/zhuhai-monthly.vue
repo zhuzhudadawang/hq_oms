@@ -11,22 +11,16 @@
       <EChart :option="monthlyOption" height="440px" />
 
       <el-row :gutter="16" class="summary-row">
-        <el-col :xs="24" :sm="8">
+        <el-col :xs="24" :sm="12">
           <div class="summary-card primary">
             <div class="summary-label">{{ monthlySummary.prevYearLabel }}</div>
             <div class="summary-value">{{ monthlySummary.total2024 }}</div>
           </div>
         </el-col>
-        <el-col :xs="24" :sm="8">
+        <el-col :xs="24" :sm="12">
           <div class="summary-card info">
             <div class="summary-label">{{ monthlySummary.currYearLabel }}</div>
             <div class="summary-value">{{ monthlySummary.total2025 }}</div>
-          </div>
-        </el-col>
-        <el-col :xs="24" :sm="8">
-          <div class="summary-card accent">
-            <div class="summary-label">同比增长</div>
-            <div class="summary-value">{{ monthlySummary.yoyGrowth }}</div>
           </div>
         </el-col>
       </el-row>
@@ -49,7 +43,7 @@ const monthlySummary = reactive({
   currYearLabel: '本年订单总量'
 })
 
-const monthlyOption = ref(buildMonthlyOption([], [], []))
+const monthlyOption = ref(buildMonthlyOption([], [], { data: [], label: '同比增长率' }, { data: [], label: '环比增长率' }))
 
 const DEFAULT_MONTHLY_DATA = {
   months: [
@@ -145,8 +139,9 @@ const applyMonthlyPayload = (payload) => {
   }, {})
 
   const yoySeries = buildYoYSeries(numericSeries)
+  const momSeries = buildMoMSeries(numericSeries)
 
-  monthlyOption.value = buildMonthlyOption(months, numericSeries, yoySeries)
+  monthlyOption.value = buildMonthlyOption(months, numericSeries, yoySeries, momSeries)
 
   // 按年份排序，取最新两年用于统计卡片
   const parseYear = (name) => {
@@ -187,7 +182,7 @@ const fetchMonthlyData = async () => {
 onMounted(fetchMonthlyData)
 
 function buildYoYSeries(series) {
-  if (!series.length) return []
+  if (!series.length) return { data: [], label: '同比增长率' }
 
   const parseYear = (name) => {
     const match = String(name || '').match(/20\d{2}/)
@@ -197,7 +192,7 @@ function buildYoYSeries(series) {
   const yearSeries = series.filter((item) => parseYear(item.name) !== null)
   if (yearSeries.length < 2) {
     const length = series[0]?.data?.length || 0
-    return new Array(length).fill(null)
+    return { data: new Array(length).fill(null), label: '同比增长率' }
   }
 
   // 按年份排序，取最新两年计算同比
@@ -206,32 +201,135 @@ function buildYoYSeries(series) {
   const latestSeries = sorted[sorted.length - 1] // 最新年
 
   if (!baseSeries || !latestSeries || baseSeries === latestSeries) {
-    return new Array((latestSeries?.data?.length) || 0).fill(null)
+    return { data: new Array((latestSeries?.data?.length) || 0).fill(null), label: '同比增长率' }
   }
+
+  const baseYear = parseYear(baseSeries.name)
+  const latestYear = parseYear(latestSeries.name)
+  const label = `同比增长率(${baseYear}&${latestYear})`
 
   const baseData = Array.isArray(baseSeries.data) ? baseSeries.data : []
   const latestData = Array.isArray(latestSeries.data) ? latestSeries.data : []
 
-  return latestData.map((value, index) => {
+  const data = latestData.map((value, index) => {
     const baseValue = Number(baseData[index])
     const currentValue = Number(value)
-    // 当前值为0或无效时不显示同比
     if (!Number.isFinite(baseValue) || baseValue === 0 || !Number.isFinite(currentValue) || currentValue === 0) {
       return null
     }
     const rate = ((currentValue - baseValue) / baseValue) * 100
     return Number(rate.toFixed(2))
   })
+
+  return { data, label }
 }
 
-function buildMonthlyOption(months, series, yoySeries) {
+// 计算环比增长率（最新一年的月环比，1月份与上一年12月对比）
+function buildMoMSeries(series) {
+  if (!series.length) return { data: [], label: '环比增长率' }
+
+  const parseYear = (name) => {
+    const match = String(name || '').match(/20\d{2}/)
+    return match ? Number(match[0]) : null
+  }
+
+  const yearSeries = series.filter((item) => parseYear(item.name) !== null)
+  if (!yearSeries.length) {
+    const length = series[0]?.data?.length || 0
+    return { data: new Array(length).fill(null), label: '环比增长率' }
+  }
+
+  // 按年份排序
+  const sorted = [...yearSeries].sort((a, b) => parseYear(a.name) - parseYear(b.name))
+  const latestSeries = sorted[sorted.length - 1]
+  const prevYearSeries = sorted.length >= 2 ? sorted[sorted.length - 2] : null
+  const latestYear = parseYear(latestSeries.name)
+  const label = `环比增长率(${latestYear})`
+
+  const latestData = Array.isArray(latestSeries.data) ? latestSeries.data : []
+  const prevYearData = prevYearSeries && Array.isArray(prevYearSeries.data) ? prevYearSeries.data : []
+
+  const data = latestData.map((value, index) => {
+    let prevValue
+    if (index === 0) {
+      // 1月份与上一年12月对比
+      prevValue = prevYearData.length >= 12 ? Number(prevYearData[11]) : null
+    } else {
+      // 其他月份与本年上个月对比
+      prevValue = Number(latestData[index - 1])
+    }
+    const currentValue = Number(value)
+    if (!Number.isFinite(prevValue) || prevValue === 0 || !Number.isFinite(currentValue) || currentValue === 0) {
+      return null
+    }
+    const rate = ((currentValue - prevValue) / prevValue) * 100
+    return Number(rate.toFixed(2))
+  })
+
+  return { data, label }
+}
+
+function buildMonthlyOption(months, series, yoySeries, momSeries) {
   const palette = ['#409EFF', '#67C23A', '#F1C40F ', '#909399']
-  const hasYoY = Array.isArray(yoySeries) && yoySeries.some((value) => Number.isFinite(value))
-  const yoyValues = hasYoY ? yoySeries.filter((value) => Number.isFinite(value)) : []
-  const yoyMin = yoyValues.length ? Math.min(...yoyValues) : 0
-  const yoyMax = yoyValues.length ? Math.max(...yoyValues) : 0
-  const yoyRangeGap = yoyMax - yoyMin
-  const yoyPadding = hasYoY ? (yoyRangeGap === 0 ? 5 : Math.max(2, Math.abs(yoyRangeGap) * 0.1)) : 0
+  const hasYoY = Array.isArray(yoySeries.data) && yoySeries.data.some((value) => Number.isFinite(value))
+  const hasMoM = Array.isArray(momSeries.data) && momSeries.data.some((value) => Number.isFinite(value))
+  
+  // 合并同比和环比数据计算Y轴范围
+  const allRateValues = [
+    ...(hasYoY ? yoySeries.data.filter((value) => Number.isFinite(value)) : []),
+    ...(hasMoM ? momSeries.data.filter((value) => Number.isFinite(value)) : [])
+  ]
+  const rateMin = allRateValues.length ? Math.min(...allRateValues) : 0
+  const rateMax = allRateValues.length ? Math.max(...allRateValues) : 0
+  const rateRangeGap = rateMax - rateMin
+  const ratePadding = (hasYoY || hasMoM) ? (rateRangeGap === 0 ? 5 : Math.max(2, Math.abs(rateRangeGap) * 0.1)) : 0
+
+  const legendData = [...series.map((item) => item.name)]
+  if (hasYoY) legendData.push(yoySeries.label)
+  if (hasMoM) legendData.push(momSeries.label)
+
+  const lineSeries = []
+  if (hasYoY) {
+    lineSeries.push({
+      name: yoySeries.label,
+      type: 'line',
+      yAxisIndex: 1,
+      smooth: true,
+      itemStyle: {
+        color: '#F56C6C'
+      },
+      label: {
+        show: true,
+        fontSize: 10,
+        formatter: ({ value }) =>
+          Number.isFinite(value) ? `${Number(value).toFixed(1)}%` : ''
+      },
+      data: yoySeries.data,
+      connectNulls: true
+    })
+  }
+  if (hasMoM) {
+    lineSeries.push({
+      name: momSeries.label,
+      type: 'line',
+      yAxisIndex: 1,
+      smooth: true,
+      lineStyle: {
+        type: 'dashed'
+      },
+      itemStyle: {
+        color: '#9B59B6'
+      },
+      label: {
+        show: true,
+        fontSize: 10,
+        formatter: ({ value }) =>
+          Number.isFinite(value) ? `${Number(value).toFixed(1)}%` : ''
+      },
+      data: momSeries.data,
+      connectNulls: true
+    })
+  }
 
   return {
     tooltip: {
@@ -240,7 +338,7 @@ function buildMonthlyOption(months, series, yoySeries) {
         if (!Array.isArray(items)) return ''
         return items
           .map((entry) => {
-            if (entry.seriesName === '同比增长率') {
+            if (entry.seriesName.includes('增长率')) {
               const val = Number(entry.value)
               if (!Number.isFinite(val)) return ''
               return `${entry.marker}${entry.seriesName}: ${val.toFixed(2)}%`
@@ -252,10 +350,7 @@ function buildMonthlyOption(months, series, yoySeries) {
       }
     },
     legend: {
-      data: [
-        ...series.map((item) => item.name),
-        ...(hasYoY ? ['同比增长率'] : [])
-      ]
+      data: legendData
     },
     grid: {
       top: 52,
@@ -276,9 +371,9 @@ function buildMonthlyOption(months, series, yoySeries) {
       },
       {
         type: 'value',
-        name: '同比 (%)',
-        min: hasYoY ? Math.floor(yoyMin - yoyPadding) : 0,
-        max: hasYoY ? Math.ceil(yoyMax + yoyPadding) : 0,
+        name: '增长率 (%)',
+        min: (hasYoY || hasMoM) ? Math.floor(rateMin - ratePadding) : 0,
+        max: (hasYoY || hasMoM) ? Math.ceil(rateMax + ratePadding) : 0,
         axisLabel: {
           formatter: '{value}%'
         }
@@ -300,27 +395,7 @@ function buildMonthlyOption(months, series, yoySeries) {
         },
         data: item.data
       })),
-      ...(hasYoY
-        ? [
-            {
-              name: '同比增长率',
-              type: 'line',
-              yAxisIndex: 1,
-              smooth: true,
-              itemStyle: {
-                color: '#F56C6C'
-              },
-              label: {
-                show: true,
-                fontSize: 10,
-                formatter: ({ value }) =>
-                  Number.isFinite(value) ? `${Number(value).toFixed(1)}%` : ''
-              },
-              data: yoySeries,
-              connectNulls: true
-            }
-          ]
-        : [])
+      ...lineSeries
     ]
   }
 }

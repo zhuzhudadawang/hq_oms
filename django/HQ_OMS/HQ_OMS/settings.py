@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "market",
     "sync",
     "user",
+    "business"
 ]
 
 # 允许Cookie
@@ -137,3 +138,12 @@ USE_TZ = False
 STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# DRF 全局配置
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'utils.jwt_auth.JwtHeaderAuthentication',
+    ],
+    'UNAUTHENTICATED_USER': None,
+    'EXCEPTION_HANDLER': 'utils.exception_handler.custom_exception_handler',
+}

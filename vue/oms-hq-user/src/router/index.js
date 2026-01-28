@@ -451,27 +451,58 @@ export const asyncRoutes = [
     ]
   },
   {
-    path: '/business',
-    component: Layout,
-    redirect: '/business/index',
-    meta: {
-      title: '经营数据分析',
-      icon: 'DataAnalysis',
-      requiresAuth: true,
-      roles: ['admin']
-    },
-    children: [
-      {
-        path: 'index',
-        name: 'BusinessIndex',
-        component: () => import('@/views/business/index.vue'),
-        meta: {
-          title: '经营数据概览',
-          icon: 'DataLine'
-        }
-      }
-    ]
+  path: '/business',
+  component: Layout,
+  redirect: '/business/management-finance', // 修改重定向到第一个子菜单
+  meta: {
+    title: '经营数据分析',
+    icon: 'DataAnalysis',
+    requiresAuth: true,
+    roles: ['admin']
   },
+  children: [
+    {
+      path: 'management-finance',
+      name: 'ManagementFinance',
+      component: () => import('@/views/business/management-finance.vue'),
+      meta: {
+        title: '管理层财务概况表',
+        icon: 'DataLine',
+        permissions: ['business:view']
+      }
+    },
+    {
+      path: 'founder-finance',
+      name: 'FounderFinance',
+      component: () => import('@/views/business/founder-finance.vue'),
+      meta: {
+        title: '创始股东财务概况表',
+        icon: 'DataLine',
+        permissions: ['business:view']
+      }
+    },
+    {
+      path: 'founder-assets',
+      name: 'FounderAssets',
+      component: () => import('@/views/business/founder-assets.vue'),
+      meta: {
+        title: '创始股东资产分析表',
+        icon: 'DataLine',
+        permissions: ['business:view']
+      }
+    },
+    {
+      path: 'transactions-detail',
+      name: 'TransactionsDetail',
+      component: () => import('@/views/business/transactions-detail.vue'),
+      meta: {
+        title: '往来款明细表',
+        icon: 'DataLine',
+        permissions: ['business:view']
+      }
+    }
+  ]
+}
 ]
 
 const routes = [...constantRoutes, ...asyncRoutes]

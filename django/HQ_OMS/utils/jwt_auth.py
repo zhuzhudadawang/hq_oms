@@ -1,53 +1,64 @@
 import datetime
-
 import jwt
 from rest_framework.authentication import BaseAuthentication
+from rest_framework.exceptions import AuthenticationFailed
 
-from HQ_OMS.settings import SECRET_KEY
+
+def get_secret_key():
+    """延迟导入，避免循环导入"""
+    from django.conf import settings
+    return settings.SECRET_KEY
 
 
-def create_token(payload,timeout=120):
+def create_token(payload, timeout=60*24*7):
+    """创建 JWT token，默认7天有效"""
     headers = {
-        'alg': 'HS256',  # 算法：HMAC SHA-256
-        'typ': 'JWT'  # 类型：JWT
+        'alg': 'HS256',
+        'typ': 'JWT'
     }
-    # payload["exp"] = datetime.datetime.utcnow() + datetime.timedelta(minutes=timeout)
-    payload["exp"] = datetime.datetime.now(datetime.UTC) + datetime.timedelta(minutes=timeout) # 定义超时时间
-    result =  jwt.encode(headers=headers, payload=payload, key=SECRET_KEY,algorithm='HS256')
+    payload["exp"] = datetime.datetime.now(datetime.UTC) + datetime.timedelta(minutes=timeout)
+    result = jwt.encode(headers=headers, payload=payload, key=get_secret_key(), algorithm='HS256')
     return result
 
+
 def get_payload(token):
-    result = {"status": False, "data": None,"error": None}
+    """解析 token，返回 payload"""
+    result = {"status": False, "data": None, "error": None}
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms='HS256')
+        payload = jwt.decode(token, get_secret_key(), algorithms=['HS256'])
         result["status"] = True
         result["data"] = payload
     except jwt.exceptions.DecodeError:
-        print("Token decode error失败")
-        result["error"] = "Token decode error失败"
+        result["error"] = "Token 解析失败"
     except jwt.exceptions.ExpiredSignatureError:
-        print("Token expired失效")
-        result["error"] = "Token expired失效"
+        result["error"] = "Token 已过期"
     except jwt.exceptions.InvalidTokenError:
-        print("Token invalid非法")
-        result["error"] = "Token invalid非法"
+        result["error"] = "Token 无效"
     return result
 
-# 用户在url中进行token的参数配置
+
 class JwtQueryParamAuthentication(BaseAuthentication):
+    """URL 参数传递 token"""
     def authenticate(self, request):
-        # 从url中拿到token
         token = request.GET.get("token")
         result_payload = get_payload(token)
-        print(result_payload)
-        return (result_payload,token)
-# 请求头传递
+        return (result_payload, token)
+
+
 class JwtHeaderAuthentication(BaseAuthentication):
+    """请求头传递 token"""
     def authenticate(self, request):
-        # 从头信息中拿到token
-        # print(request.META)
-        # token = request.META.get("HTTP_TOKEN")  postman中这样获取
-        token = request.META.get("HTTP_AUTHORIZATION")  # 浏览器中这样获取
+        token = request.META.get("HTTP_AUTHORIZATION")
+        
+        if not token:
+            raise AuthenticationFailed("未提供 Token")
+        
+        if token.startswith("Bearer "):
+            token = token[7:]
+        
         result_payload = get_payload(token)
-        print(result_payload)
-        return (result_payload,token)
+        
+        if not result_payload["status"]:
+            raise AuthenticationFailed(result_payload["error"] or "Token 无效")
+        
+        return (result_payload["data"], token)
