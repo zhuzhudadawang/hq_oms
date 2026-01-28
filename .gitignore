@@ -3,6 +3,9 @@
 *.rar
 *.7z
 
+# SQL文件
+oms.sql
+
 # Node
 node_modules/
 

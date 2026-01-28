@@ -14,7 +14,7 @@ class FibEngineerProjectCountAPI(APIView):
                            "TEM样品制备（平面、倒切、侧切_单一完整）", "TEM样品制备（正切_孔洞完整）",
                            "TEM样品制备（正切_单一完整）", "TEM制样_细修（深度＞5um）", "TEM制样_细修（深度≤5um）",
                            "TEM样品制备（机械研磨）", "TEM样品制备（平面、倒切、侧切_分步）", "TEM样品制备（正切_分步）",
-                           "TEM样品制备（clean）", "SEM/EDS分析服务"]
+                           "TEM样品制备（clean）", "SEM/EDS分析服务","PFIB大尺寸切割"]
         failed_status = ["失败", "内部失败", "外部失败"]
         completed_statuses = ["成功", "等待质审核工序", "检测中", "返工工序", "失败", "内部失败", "外部失败"]
 
@@ -148,7 +148,7 @@ class FibEngineerPerformanceHoursAPI(APIView):
                      "TEM样品制备（平面、倒切、侧切_单一完整）", "TEM样品制备（正切_孔洞完整）",
                      "TEM样品制备（正切_单一完整）", "TEM制样_细修（深度＞5um）", "TEM制样_细修（深度≤5um）",
                      "TEM样品制备（机械研磨）", "TEM样品制备（平面、倒切、侧切_分步）", "TEM样品制备（正切_分步）",
-                     "TEM样品制备（clean）", "SEM/EDS分析服务"]
+                     "TEM样品制备（clean）", "SEM/EDS分析服务","PFIB大尺寸切割"]
         month_param = request.query_params.get("month", None)
         try:
             if month_param:
@@ -219,7 +219,7 @@ class TemEngineerProjectCountAPI(APIView):
         test_item = ["PED测试", "非球差TEM-EDS点分析服务", "球差TEM-EDS点分析服务", "非球差TEM-EDS线分析服务",
                      "球差TEM-EDS线分析服务", "非球差TEM-EDS面分析服务", "球差TEM-EDS面分析服务",
                      "非球差TEM-EELS分析服务", "球差TEM-EELS分析服务", "非球差TEM分析服务", "球差TEM分析服务",
-                     "STEM分析服务", "TEM补拍"]  # 目标检测项目
+                     "STEM分析服务", "TEM补拍","粉末样品TEM制样"]  # 目标检测项目
         failed_status = ["失败", "内部失败", "外部失败"]
         completed_statuses = ["成功", "等待质审核工序", "检测中", "返工工序", "失败", "内部失败", "外部失败"]  # 所有完成状态
 
@@ -348,7 +348,7 @@ class TemEngineerPerformanceHoursAPI(APIView):
         test_item = ["PED测试", "非球差TEM-EDS点分析服务", "球差TEM-EDS点分析服务", "非球差TEM-EDS线分析服务",
                      "球差TEM-EDS线分析服务", "非球差TEM-EDS面分析服务", "球差TEM-EDS面分析服务",
                      "非球差TEM-EELS分析服务", "球差TEM-EELS分析服务", "非球差TEM分析服务", "球差TEM分析服务",
-                     "STEM分析服务", "TEM补拍"]  # 目标检测项目
+                     "STEM分析服务", "TEM补拍","粉末样品TEM制样"]  # 目标检测项目
         failed_status = ["失败", "内部失败", "外部失败"]
         month_param = request.query_params.get("month", None)
         try:
@@ -421,7 +421,7 @@ class FibEngineerDailyProjectCountAPI(APIView):
                      "TEM样品制备（平面、倒切、侧切_单一完整）", "TEM样品制备（正切_孔洞完整）",
                      "TEM样品制备（正切_单一完整）", "TEM制样_细修（深度＞5um）", "TEM制样_细修（深度≤5um）",
                      "TEM样品制备（机械研磨）", "TEM样品制备（平面、倒切、侧切_分步）", "TEM样品制备（正切_分步）",
-                     "TEM样品制备（clean）", "SEM/EDS分析服务"]
+                     "TEM样品制备（clean）", "SEM/EDS分析服务","PFIB大尺寸切割"]
         failed_status = ["失败", "内部失败", "外部失败"]
         completed_statuses = ["成功", "等待质审核工序", "检测中", "返工工序", "失败", "内部失败", "外部失败"]  # 所有完成状态
         excluded_engineers = ["", "樊佳博"]
@@ -568,7 +568,7 @@ class FibInternalEngineerDailyProjectCountAPI(APIView):
                      "TEM样品制备（平面、倒切、侧切_单一完整）", "TEM样品制备（正切_孔洞完整）",
                      "TEM样品制备（正切_单一完整）", "TEM制样_细修（深度＞5um）", "TEM制样_细修（深度≤5um）",
                      "TEM样品制备（机械研磨）", "TEM样品制备（平面、倒切、侧切_分步）", "TEM样品制备（正切_分步）",
-                     "TEM样品制备（clean）", "SEM/EDS分析服务"]
+                     "TEM样品制备（clean）", "SEM/EDS分析服务","PFIB大尺寸切割"]
         failed_status = ["内部失败"]
         completed_statuses = ["成功", "等待质审核工序", "检测中", "返工工序", "失败", "内部失败", "外部失败"]  # 所有完成状态
         excluded_engineers = ["", "樊佳博"]
@@ -715,7 +715,7 @@ class FibExternalEngineerDailyProjectCountAPI(APIView):
                      "TEM样品制备（平面、倒切、侧切_单一完整）", "TEM样品制备（正切_孔洞完整）",
                      "TEM样品制备（正切_单一完整）", "TEM制样_细修（深度＞5um）", "TEM制样_细修（深度≤5um）",
                      "TEM样品制备（机械研磨）", "TEM样品制备（平面、倒切、侧切_分步）", "TEM样品制备（正切_分步）",
-                     "TEM样品制备（clean）", "SEM/EDS分析服务"]
+                     "TEM样品制备（clean）", "SEM/EDS分析服务","PFIB大尺寸切割"]
         failed_status = ["外部失败"]
         completed_statuses = ["成功", "等待质审核工序", "检测中", "返工工序", "失败", "内部失败", "外部失败"]  # 所有完成状态
         excluded_engineers = ["", "樊佳博"]
@@ -862,7 +862,7 @@ class TemEngineerDailyProjectCountAPI(APIView):
         test_item = ["PED测试", "非球差TEM-EDS点分析服务", "球差TEM-EDS点分析服务", "非球差TEM-EDS线分析服务",
                      "球差TEM-EDS线分析服务", "非球差TEM-EDS面分析服务", "球差TEM-EDS面分析服务",
                      "非球差TEM-EELS分析服务", "球差TEM-EELS分析服务", "非球差TEM分析服务", "球差TEM分析服务",
-                     "STEM分析服务", "TEM补拍"]  # 目标检测项目
+                     "STEM分析服务", "TEM补拍","粉末样品TEM制样"]  # 目标检测项目
         failed_status = ["失败", "内部失败", "外部失败"]
         failed_status = ["失败", "内部失败", "外部失败"]
         completed_statuses = ["成功", "等待质审核工序", "检测中", "返工工序", "失败", "内部失败", "外部失败"]  # 所有完成状态
@@ -1004,7 +1004,7 @@ class TemInternalEngineerDailyProjectCountAPI(APIView):
         test_item = ["PED测试", "非球差TEM-EDS点分析服务", "球差TEM-EDS点分析服务", "非球差TEM-EDS线分析服务",
                      "球差TEM-EDS线分析服务", "非球差TEM-EDS面分析服务", "球差TEM-EDS面分析服务",
                      "非球差TEM-EELS分析服务", "球差TEM-EELS分析服务", "非球差TEM分析服务", "球差TEM分析服务",
-                     "STEM分析服务", "TEM补拍"]  # 目标检测项目
+                     "STEM分析服务", "TEM补拍","粉末样品TEM制样"]  # 目标检测项目
         failed_status = ["失败", "内部失败", "外部失败"]
         failed_status = ["内部失败"]
         completed_statuses = ["成功", "等待质审核工序", "检测中", "返工工序", "失败", "内部失败", "外部失败"]  # 所有完成状态
@@ -1146,7 +1146,7 @@ class TemExternalEngineerDailyProjectCountAPI(APIView):
         test_item = ["PED测试", "非球差TEM-EDS点分析服务", "球差TEM-EDS点分析服务", "非球差TEM-EDS线分析服务",
                      "球差TEM-EDS线分析服务", "非球差TEM-EDS面分析服务", "球差TEM-EDS面分析服务",
                      "非球差TEM-EELS分析服务", "球差TEM-EELS分析服务", "非球差TEM分析服务", "球差TEM分析服务",
-                     "STEM分析服务", "TEM补拍"]  # 目标检测项目
+                     "STEM分析服务", "TEM补拍","粉末样品TEM制样"]  # 目标检测项目
         failed_status = ["失败", "内部失败", "外部失败"]
         failed_status = ["外部失败"]
         completed_statuses = ["成功", "等待质审核工序", "检测中", "返工工序", "失败", "内部失败", "外部失败"]  # 所有完成状态
@@ -1291,7 +1291,7 @@ class FibEngineerSuccessByDateRangeAPI(APIView):
                      "TEM样品制备（平面、倒切、侧切_单一完整）", "TEM样品制备（正切_孔洞完整）",
                      "TEM样品制备（正切_单一完整）", "TEM制样_细修（深度＞5um）", "TEM制样_细修（深度≤5um）",
                      "TEM样品制备（机械研磨）", "TEM样品制备（平面、倒切、侧切_分步）", "TEM样品制备（正切_分步）",
-                     "TEM样品制备（clean）", "SEM/EDS分析服务"]
+                     "TEM样品制备（clean）", "SEM/EDS分析服务","PFIB大尺寸切割"]
         completed_statuses = ["成功", "等待质审核工序", "检测中", "返工工序", "失败", "内部失败", "外部失败"]
         day_required_count = 3.5  # 每日应当数量
 
@@ -1383,7 +1383,7 @@ class TemEngineerSuccessByDateRangeAPI(APIView):
         test_item = ["PED测试", "非球差TEM-EDS点分析服务", "球差TEM-EDS点分析服务", "非球差TEM-EDS线分析服务",
                      "球差TEM-EDS线分析服务", "非球差TEM-EDS面分析服务", "球差TEM-EDS面分析服务",
                      "非球差TEM-EELS分析服务", "球差TEM-EELS分析服务", "非球差TEM分析服务", "球差TEM分析服务",
-                     "STEM分析服务", "TEM补拍"]  # 目标检测项目
+                     "STEM分析服务", "TEM补拍","粉末样品TEM制样"]  # 目标检测项目
         failed_status = ["失败", "内部失败", "外部失败"]
         completed_statuses = ["成功", "等待质审核工序", "检测中", "返工工序", "失败", "内部失败", "外部失败"]
         day_required_count = 10  # 每日应当数量
@@ -1472,7 +1472,7 @@ class FibEngineerSuccessCoreIndexAPI(APIView):
                      "TEM样品制备（平面、倒切、侧切_单一完整）", "TEM样品制备（正切_孔洞完整）",
                      "TEM样品制备（正切_单一完整）", "TEM制样_细修（深度＞5um）", "TEM制样_细修（深度≤5um）",
                      "TEM样品制备（机械研磨）", "TEM样品制备（平面、倒切、侧切_分步）", "TEM样品制备（正切_分步）",
-                     "TEM样品制备（clean）", "SEM/EDS分析服务"]
+                     "TEM样品制备（clean）", "SEM/EDS分析服务","PFIB大尺寸切割"]
         completed_statuses = ["成功", "等待质审核工序", "检测中", "返工工序", "失败", "内部失败", "外部失败"]
         day_required_count = 3.5
 
@@ -1551,7 +1551,7 @@ class TemEngineerSuccessCoreIndexAPI(APIView):
         test_item = ["PED测试", "非球差TEM-EDS点分析服务", "球差TEM-EDS点分析服务", "非球差TEM-EDS线分析服务",
                      "球差TEM-EDS线分析服务", "非球差TEM-EDS面分析服务", "球差TEM-EDS面分析服务",
                      "非球差TEM-EELS分析服务", "球差TEM-EELS分析服务", "非球差TEM分析服务", "球差TEM分析服务",
-                     "STEM分析服务", "TEM补拍"]  # 目标检测项目
+                     "STEM分析服务", "TEM补拍","粉末样品TEM制样"]  # 目标检测项目
         failed_status = ["失败", "内部失败", "外部失败"]
         completed_statuses = ["成功", "等待质审核工序", "检测中", "返工工序", "失败", "内部失败", "外部失败"]
         day_required_count = 10  # 每日应当数量
@@ -2259,7 +2259,7 @@ class FibCustomerExternalDailyProjectCountAPI(APIView):
                      "TEM样品制备（平面、倒切、侧切_单一完整）", "TEM样品制备（正切_孔洞完整）",
                      "TEM样品制备（正切_单一完整）", "TEM制样_细修（深度＞5um）", "TEM制样_细修（深度≤5um）",
                      "TEM样品制备（机械研磨）", "TEM样品制备（平面、倒切、侧切_分步）", "TEM样品制备（正切_分步）",
-                     "TEM样品制备（clean）", "SEM/EDS分析服务"]
+                     "TEM样品制备（clean）", "SEM/EDS分析服务","PFIB大尺寸切割"]
         failed_status = ["外部失败"]
         completed_statuses = ["成功", "等待质审核工序", "检测中", "返工工序", "失败", "内部失败", "外部失败"]
 

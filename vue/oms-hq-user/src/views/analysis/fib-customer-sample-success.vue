@@ -14,6 +14,9 @@
             <el-option label="中科路" value="中科路"></el-option>
             <el-option label="洋山港" value="洋山港"></el-option>
             <el-option label="新场镇" value="新场镇"></el-option>
+            <el-option label="张江实验室" value="张江实验室"></el-option>
+            <el-option label="晶合" value="晶合"></el-option>
+            <el-option label="菱角湖" value="菱角湖"></el-option>
           </el-select>
           <div class="header-actions">
             <el-date-picker

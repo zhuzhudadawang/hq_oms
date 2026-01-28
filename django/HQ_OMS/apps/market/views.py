@@ -496,15 +496,21 @@ class ZhuhaiImportantCustomerAPI(APIView):
 
 # --- 上海重要客户统计 ---
 class ShanghaiImportantCustomerAPI(APIView):
-    TARGET_CUSTOMERS = ["五角场", "中科路", "洋山港", "新场镇"]
+    TARGET_CUSTOMERS = ["五角场", "中科路", "洋山港", "新场镇", "张江实验室", "晶合", "菱角湖"]
 
     # 客户名称映射关系
     CUSTOMER_MAPPING = {
         "五角场": "五角场",
         "中科路": "中科路（格科）",
         "洋山港": "洋山港（ZW）",
-        "新场镇": "新场镇（昕原）"
+        "新场镇": "新场镇（昕原）",
+        "张江实验室": "张江实验室",
+        "晶合": "晶合",
+        "菱角湖": "菱角湖"
     }
+
+    # 全动态查询的客户（不使用写死数据）
+    DYNAMIC_ONLY_CUSTOMERS = ["张江实验室", "晶合", "菱角湖"]
 
     # 需要动态查询的月份
     DYNAMIC_MONTHS_2025 = [11, 12]
@@ -568,8 +574,14 @@ class ShanghaiImportantCustomerAPI(APIView):
             # 获取客户的显示名称
             customer_display_name = self.CUSTOMER_MAPPING.get(customer_db_name, customer_db_name)
 
+            # 判断是否为全动态查询的客户
+            is_dynamic_only = customer_db_name in self.DYNAMIC_ONLY_CUSTOMERS
+
             # --- 处理对比年份的数据 ---
-            if comparison_year == 2025:
+            if is_dynamic_only:
+                # 全动态查询客户，直接查询全年数据
+                comparison_series_data = self._get_dynamic_monthly_data(comparison_year, customer_db_name, self.ALL_MONTHS)
+            elif comparison_year == 2025:
                 # 2025年 = 固定数据 + 动态11-12月
                 fixed_part = self.FIXED_DATA.get(2025, {}).get(customer_db_name, [0] * 10)
                 dynamic_part = self._get_dynamic_monthly_data(2025, customer_db_name, self.DYNAMIC_MONTHS_2025)
@@ -587,7 +599,10 @@ class ShanghaiImportantCustomerAPI(APIView):
             }
 
             # --- 处理主年份的数据 ---
-            if primary_year == 2025:
+            if is_dynamic_only:
+                # 全动态查询客户，直接查询全年数据
+                primary_series_data = self._get_dynamic_monthly_data(primary_year, customer_db_name, self.ALL_MONTHS)
+            elif primary_year == 2025:
                 # 2025年 = 固定数据 + 动态11-12月
                 fixed_part = self.FIXED_DATA.get(2025, {}).get(customer_db_name, [0] * 10)
                 dynamic_part = self._get_dynamic_monthly_data(2025, customer_db_name, self.DYNAMIC_MONTHS_2025)
