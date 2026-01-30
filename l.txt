@@ -1,0 +1,27 @@
+import requests
+import json
+
+url = "http://ftp.hq-nano.com:10001/api/bmapi/v1/data/64e577b3094fc3a856105278/651500c24c2b7e3436eebd0b/query"
+
+payload = json.dumps({
+    "view": "collection-651500c24c2b7e3436eebd0b-1746156391228",
+    "query": {
+        "$and": []
+    },
+    "page": {
+        "index": 1,
+        "size": 20
+    },
+    "sort": "",
+    "option": {
+        "simple": true
+    }
+})
+headers = {
+   'Content-Type': 'application/json',
+   'bm-x-token': '18ef0cd6f7b948a9977b27157983c0a6'
+}
+
+response = requests.request("POST", url, headers=headers, data=payload)
+
+print(response.text)
