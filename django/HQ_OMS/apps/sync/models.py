@@ -283,3 +283,28 @@ class Sample(models.Model):
         managed = False
         db_table = 'sample'
         db_table_comment = '样点列表'
+
+class Orderitem(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    project = models.CharField(max_length=200, blank=True, null=True, db_comment='项目')
+    quantity = models.IntegerField(blank=True, null=True, db_comment='数量')
+    unit = models.CharField(max_length=50, blank=True, null=True, db_comment='单位')
+    unit_price_before_tax = models.DecimalField(max_digits=12, decimal_places=5, blank=True, null=True, db_comment='单价（未税）')
+    unit_price_after_tax = models.DecimalField(max_digits=12, decimal_places=5, blank=True, null=True, db_comment='单价（含税）')
+    amount_before_tax = models.DecimalField(max_digits=12, decimal_places=5, blank=True, null=True, db_comment='金额（未税）')
+    amount_after_tax = models.DecimalField(max_digits=12, decimal_places=5, blank=True, null=True, db_comment='金额（含税）')
+    billing_quantity = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, db_comment='计价数量')
+    tax_rate = models.CharField(max_length=20, blank=True, null=True, db_comment='税率')
+    order_id = models.CharField(max_length=50, blank=True, null=True, db_comment='关联订单')
+    customer = models.CharField(max_length=100, blank=True, null=True, db_comment='客户')
+    commission_date = models.DateField(blank=True, null=True, db_comment='委案日期')
+    commissioner = models.CharField(max_length=100, blank=True, null=True, db_comment='委托人')
+    remark = models.TextField(blank=True, null=True, db_comment='备注')
+    validity_hours = models.IntegerField(blank=True, null=True, db_comment='时效(h)')
+    validity_start_date = models.DateField(blank=True, null=True, db_comment='时效开始日期')
+    validity_start_time = models.CharField(max_length=20, blank=True, null=True, db_comment='时效起算时间')
+
+    class Meta:
+        managed = False
+        db_table = 'orderitem'
+        db_table_comment = '订单项目表'
