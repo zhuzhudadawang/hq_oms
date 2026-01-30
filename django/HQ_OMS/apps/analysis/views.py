@@ -14,7 +14,7 @@ class FibEngineerProjectCountAPI(APIView):
                            "TEM样品制备（平面、倒切、侧切_单一完整）", "TEM样品制备（正切_孔洞完整）",
                            "TEM样品制备（正切_单一完整）", "TEM制样_细修（深度＞5um）", "TEM制样_细修（深度≤5um）",
                            "TEM样品制备（机械研磨）", "TEM样品制备（平面、倒切、侧切_分步）", "TEM样品制备（正切_分步）",
-                           "TEM样品制备（clean）", "SEM/EDS分析服务", "PFIB大尺寸切割"]
+                           "TEM样品制备（clean）", "SEM/EDS分析服务","PFIB大尺寸切割"]
         failed_status = ["失败", "内部失败", "外部失败"]
         completed_statuses = ["成功", "等待质审核工序", "检测中", "返工工序", "失败", "内部失败", "外部失败"]
 

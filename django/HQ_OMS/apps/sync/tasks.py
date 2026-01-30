@@ -7,7 +7,7 @@ import json
 from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from apps.sync.models import Process, MachineUsageRecord, Order, Machine, Sample, Orderitem
+from apps.sync.models import Process, MachineUsageRecord, Order, Machine, Sample
 
 # ==================== 配置区域（方便修改） ====================
 
@@ -187,32 +187,6 @@ MACHINE_FIELD_MAPPING = {
     "机台预设价格(￥/分钟)(未税)": "preset_price_before_tax",
     "机台预设价格(￥/分钟)(含税)": "preset_price_after_tax",
     # "税率": "tax_rate",
-}
-
-# ==================== 订单项目表配置 ====================
-
-ORDERITEM_API_URL = f"{API_BASE_URL}/api/bmapi/v1/data/64e577b3094fc3a856105278/651500c24c2b7e3436eebd0b/query"
-ORDERITEM_VIEW_ID = "collection-651500c24c2b7e3436eebd0b-1746156391228"
-
-# 订单项目表字段映射：白码字段名 -> 模型字段名
-ORDERITEM_FIELD_MAPPING = {
-    "项目": "project",
-    "数量": "quantity",
-    "单位": "unit",
-    "单价（未税）": "unit_price_before_tax",
-    "单价（含税）": "unit_price_after_tax",
-    "金额（未税）": "amount_before_tax",
-    "金额（含税）": "amount_after_tax",
-    "计价数量": "billing_quantity",
-    "税率": "tax_rate",
-    "关联订单": "order_id",
-    "客户": "customer",
-    "委案日期": "commission_date",
-    "委托人": "commissioner",
-    "备注": "remark",
-    "时效(h)": "validity_hours",
-    "时效开始日期": "validity_start_date",
-    "时效起算时间": "validity_start_time",
 }
 
 # ==================== 通用函数 ====================
@@ -727,81 +701,6 @@ def sync_sample():
     print("=" * 50)
 
 
-# ==================== 订单项目表同步 ====================
-
-def sync_orderitem():
-    """同步订单项目表（全量同步）"""
-    print("=" * 50)
-    print(f"[SYNC] 开始同步订单项目表 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print("=" * 50)
-    
-    # 1. 获取所有数据
-    print("[SYNC] [1/3] 获取白码数据...")
-    records = fetch_all_records(ORDERITEM_API_URL, ORDERITEM_VIEW_ID)
-    print(f"[SYNC] 共获取 {len(records)} 条数据")
-    
-    if not records:
-        print("[SYNC] 没有数据，跳过同步")
-        return
-    
-    # 2. 清空表数据
-    print("[SYNC] [2/3] 清空表数据...")
-    deleted_count = Orderitem.objects.all().delete()[0]
-    print(f"[SYNC] 已删除 {deleted_count} 条旧数据")
-    
-    # 3. 写入新数据（批量写入，用_id去重）
-    print("[SYNC] [3/3] 写入新数据...")
-    objects_to_create = []
-    seen_ids = set()
-    error_count = 0
-    duplicate_count = 0
-    
-    for record in records:
-        try:
-            record_id = record.get("_id", None)
-            
-            # 跳过重复的记录
-            if record_id in seen_ids:
-                duplicate_count += 1
-                continue
-            seen_ids.add(record_id)
-            
-            data = {}
-            for baima_field, model_field in ORDERITEM_FIELD_MAPPING.items():
-                value = record.get(baima_field, None)
-                
-                # 根据字段类型处理
-                if model_field in ["commission_date", "validity_start_date"]:
-                    value = parse_datetime(value)
-                elif model_field == "quantity":
-                    value = parse_int(value)
-                elif model_field == "validity_hours":
-                    value = parse_int(value)
-                elif model_field in ["unit_price_before_tax", "unit_price_after_tax", 
-                                     "amount_before_tax", "amount_after_tax", "billing_quantity"]:
-                    value = parse_decimal(value)
-                elif value == "":
-                    value = None
-                
-                data[model_field] = value
-            
-            objects_to_create.append(Orderitem(**data))
-            
-        except Exception as e:
-            error_count += 1
-            print(f"[SYNC] 数据处理失败: {e}")
-    
-    if duplicate_count > 0:
-        print(f"[SYNC] 跳过 {duplicate_count} 条重复数据")
-    
-    # 批量写入
-    if objects_to_create:
-        Orderitem.objects.bulk_create(objects_to_create, batch_size=5000)
-    
-    print(f"[SYNC] 同步完成: 成功 {len(objects_to_create)} 条, 失败 {error_count} 条")
-    print("=" * 50)
-
-
 # ==================== 统一同步入口 ====================
 
 def sync_all():
@@ -821,7 +720,6 @@ def sync_all():
         ("订单表", sync_order),
         ("样点表", sync_sample),
         ("工序表", sync_process),
-        ("订单项目表", sync_orderitem),
     ]
     
     success_count = 0

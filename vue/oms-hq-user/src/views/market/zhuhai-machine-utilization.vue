@@ -366,11 +366,7 @@ function buildChartOption(categories, actual, target, compare) {
         if (!Array.isArray(params)) return "";
         const lines = params.map((item) => {
           const value = Number(item.value);
-          // 只有"利用率"需要显示百分比，工作时间显示小时
-          const isPercent = item.seriesName === "利用率";
-          const display = Number.isFinite(value) 
-            ? (isPercent ? `${value.toFixed(1)}%` : `${value.toFixed(1)}h`)
-            : "-";
+          const display = Number.isFinite(value) ? `${value.toFixed(1)}%` : "-";
           return `${item.marker}${item.seriesName}: ${display}`;
         });
         return [`${params[0]?.axisValue || ""}`].concat(lines).join("<br />");
@@ -400,7 +396,7 @@ function buildChartOption(categories, actual, target, compare) {
     yAxis: [
       {
         type: "value",
-        name: "小时",
+        name: "数量",
         min: 0,
         max: (value) => {
           const source = Number(value.max) || 0;
